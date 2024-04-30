@@ -1,0 +1,3 @@
+rootProject.name = 'databases-service'
+include('auth-service')
+project(':auth-service').projectDir = new File('../auth-service')
