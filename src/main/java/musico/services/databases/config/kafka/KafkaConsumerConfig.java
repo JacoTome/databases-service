@@ -1,12 +1,9 @@
 package musico.services.databases.config.kafka;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import musico.services.auth.dto.AuthKafkaDTO;
-import org.apache.http.conn.util.PublicSuffixList;
+import musico.services.databases.models.kafka.MusicalWorkQueryParams;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.annotation.EnableKafka;
@@ -15,8 +12,6 @@ import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
-import org.springframework.kafka.support.serializer.JsonSerde;
-import org.springframework.kafka.support.serializer.JsonSerializer;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -28,10 +23,8 @@ public class KafkaConsumerConfig {
     private String bootstrapAddress;
 
     @Bean
-    public ConsumerFactory<String, AuthKafkaDTO> consumerFactory() {
+    public ConsumerFactory<String, MusicalWorkQueryParams> consumerFactory() {
         Map<String, Object> props = new HashMap<>();
-        JsonDeserializer<AuthKafkaDTO> deserializer = new JsonDeserializer<>(AuthKafkaDTO.class);
-        deserializer.addTrustedPackages("musico.services.*");
 
         props.put(
                 ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG,
@@ -39,17 +32,14 @@ public class KafkaConsumerConfig {
         props.put(
                 ConsumerConfig.GROUP_ID_CONFIG,
                 "database-service");
-        return new DefaultKafkaConsumerFactory<>(props, new StringDeserializer(), deserializer);
+        return new DefaultKafkaConsumerFactory<>(props, new StringDeserializer(), new JsonDeserializer<>(MusicalWorkQueryParams.class));
     }
 
     @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, AuthKafkaDTO>
-    kafkaListenerContainerFactory(KafkaTemplate<String,AuthKafkaDTO> kafkaTemplate) {
-
-        ConcurrentKafkaListenerContainerFactory<String, AuthKafkaDTO> factory =
-                new ConcurrentKafkaListenerContainerFactory<>();
+    public ConcurrentKafkaListenerContainerFactory<String, MusicalWorkQueryParams> kafkaListenerContainerFactory() {
+        ConcurrentKafkaListenerContainerFactory<String, MusicalWorkQueryParams> factory = new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(consumerFactory());
-        factory.setReplyTemplate(kafkaTemplate);
+//        factory.setReplyTemplate(kafkaTemplate);
         return factory;
     }
 

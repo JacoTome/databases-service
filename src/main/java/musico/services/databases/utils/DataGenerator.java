@@ -1,6 +1,5 @@
 package musico.services.databases.utils;
 
-
 import lombok.extern.slf4j.Slf4j;
 import musico.services.databases.config.OntEntity;
 import musico.services.databases.config.OntEntityField;
@@ -57,6 +56,7 @@ public class DataGenerator {
         }
         return data;
     }
+
 
 
     private String genUserTTL(Users user) {

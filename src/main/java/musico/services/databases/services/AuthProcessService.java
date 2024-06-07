@@ -2,16 +2,16 @@ package musico.services.databases.services;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import musico.services.auth.dto.AuthKafkaDTO;
+//import musico.services.user.dto.AuthProcessDTO;
 import musico.services.databases.enums.REGISTRATION_ENUMS;
 import musico.services.databases.models.Artist;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 @AllArgsConstructor
-@Slf4j
-public class RegistrationService {
+public class AuthProcessService {
     private final UserService userService;
     private final ArtistService artistService;
 
@@ -25,15 +25,17 @@ public class RegistrationService {
         }
         return REGISTRATION_ENUMS.CHECK_VALID;
     }
-    public REGISTRATION_ENUMS registerUser(AuthKafkaDTO userSignup) {
-        Artist artist = artistService.registerArtist(userSignup.getUsername());
-        if (artist == null) {
-            return REGISTRATION_ENUMS.REGISTRATION_FAILED_ARTIST_SAVE;
-        }
-        String hashedPassword = hashPassword(userSignup.getPassword());
-        return userService.registerUser(artist, userSignup.getUsername(), hashedPassword, userSignup.getEmail());
-    }
+//    public REGISTRATION_ENUMS registerUser(AuthProcessDTO userSignup) {
+//        Artist artist = artistService.registerArtist(userSignup.getUsername());
+//        if (artist == null) {
+//            return REGISTRATION_ENUMS.REGISTRATION_FAILED_ARTIST_SAVE;
+//        }
+//        return userService.registerUser(artist, userSignup.getUsername(), userSignup.getPassword(), userSignup.getEmail());
+//    }
 
+    public REGISTRATION_ENUMS login(String username, String password) {
+        return userService.login(username, password);
+    }
     private String hashPassword(String password) {
         return BCrypt.hashpw(password, BCrypt.gensalt(10));
     }

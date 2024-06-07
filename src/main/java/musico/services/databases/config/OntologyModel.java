@@ -56,9 +56,8 @@ public class OntologyModel {
     public static String getDefaultNamespace() {
         if (model.getNamespace("").isPresent()) {
             return model.getNamespace("").get().getName();
-        } else {
-            return "http://www.semanticweb.org/jaco/ontologies/2023/7/musinco/";
         }
+        return "http://www.semanticweb.org/jaco/ontologies/2023/7/musinco/";
     }
 
     private void checkPrefixes() {
@@ -89,6 +88,14 @@ public class OntologyModel {
         } else {
             return null;
         }
+    }
+
+    public static String getNamespaceString(String prefix) {
+        Namespace ns = getNamespace(prefix);
+        if (ns != null) {
+            return ns.getName();
+        }
+        return getDefaultNamespace();
     }
 
     public static String getPredicate(String property) {

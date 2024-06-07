@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
+import musico.services.databases.config.OntEntity;
 import musico.services.databases.config.OntologyModel;
 import org.eclipse.rdf4j.model.Namespace;
 
@@ -17,7 +18,7 @@ import org.eclipse.rdf4j.model.Namespace;
 @Builder
 @AllArgsConstructor
 @Table(name = "genre")
-public class Genre  {
+public class Genre implements OntEntity {
     @Id
     @Column(name = "genre_id", nullable = false)
     private Integer id;
@@ -25,12 +26,16 @@ public class Genre  {
     public Genre() {
     }
 
+    @Override
     public String getIRI() {
-        Namespace musinco = OntologyModel.getNamespace("");
-        assert musinco != null;
-        return musinco.getName() +
-                "Genre/" +
-                id;
+        String musinco = OntologyModel.getNamespaceString("");
+        return musinco + "Genre/" + id;
+    }
+
+    @Override
+    public String getClassIRI() {
+        String musinco = OntologyModel.getNamespaceString("mo");
+        return musinco + "Genre";
     }
 
     //TODO [JPA Buddy] generate columns from DB

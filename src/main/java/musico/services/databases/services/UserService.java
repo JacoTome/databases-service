@@ -1,6 +1,7 @@
 package musico.services.databases.services;
 
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import musico.services.databases.config.ERole;
 import musico.services.databases.enums.REGISTRATION_ENUMS;
 import musico.services.databases.models.Artist;
@@ -9,21 +10,16 @@ import musico.services.databases.models.UserRoleId;
 import musico.services.databases.models.Users;
 import musico.services.databases.repositories.RoleRepository;
 import musico.services.databases.repositories.UserRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.Set;
 
+@Slf4j
 @Service
 @AllArgsConstructor
 public class UserService {
-    private static final Logger log = LoggerFactory.getLogger(UserService.class);
 
     private UserRepository userRepository;
     private RoleRepository roleRepository;
@@ -76,9 +72,20 @@ public class UserService {
             artistService.deleteArtist(artist);
             return REGISTRATION_ENUMS.REGISTRATION_FAILED_USER_SAVE;
         }
-
         dataSenderService.sendUser(user);
         return REGISTRATION_ENUMS.REGISTRATION_SUCCESS;
+    }
+
+    public REGISTRATION_ENUMS login(String username, String password) {
+        Users user = userRepository.findFirstByUsername(username);
+        if (user == null) {
+            return REGISTRATION_ENUMS.LOGIN_FAILED_USER_NOT_FOUND;
+        }
+        if (!BCrypt.checkpw(password, user.getPassword())) {
+            log.info("User password is incorrect : {} {}", password, user.getPassword());
+            return REGISTRATION_ENUMS.LOGIN_FAILED_WRONG_PASSWORD;
+        }
+        return REGISTRATION_ENUMS.LOGIN_SUCCESS;
     }
 
     /**

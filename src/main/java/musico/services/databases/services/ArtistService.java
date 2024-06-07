@@ -1,6 +1,8 @@
 package musico.services.databases.services;
 
 import jakarta.transaction.Transactional;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import musico.services.databases.models.Artist;
 import musico.services.databases.repositories.ArtistRepository;
 import org.slf4j.Logger;
@@ -10,17 +12,13 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 
+@Slf4j
 @Service
 @Transactional
+@AllArgsConstructor
 public class ArtistService {
 
-    private static final Logger log = LoggerFactory.getLogger(ArtistService.class);
     private final ArtistRepository artistRepository;
-
-    @Autowired
-    public ArtistService(ArtistRepository artistRepository) {
-        this.artistRepository = artistRepository;
-    }
 
     public Artist registerArtist(String artist_name) {
         log.info("Registering artist: {}", artist_name);

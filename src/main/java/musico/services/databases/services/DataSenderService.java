@@ -1,11 +1,10 @@
 package musico.services.databases.services;
 
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import musico.services.databases.models.Users;
 import musico.services.databases.utils.DataGenerator;
 import org.apache.kafka.clients.producer.ProducerRecord;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
@@ -13,19 +12,13 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
+@Slf4j
 @Service
+@AllArgsConstructor
 public class DataSenderService {
-    private static final Logger log = LoggerFactory.getLogger(DataSenderService.class);
 
     private final KafkaTemplate<String, String> producer;
-
-    private static DataGenerator ttlGen = new DataGenerator();
-
-    @Autowired
-    public DataSenderService(KafkaTemplate<String, String> producer) {
-        this.producer = producer;
-        ttlGen = new DataGenerator();
-    }
+    private static final DataGenerator ttlGen = new DataGenerator();
 
     public void sendUser(Users user) {
         try {

@@ -24,6 +24,7 @@ public class KafkaTopicConfig {
 
     @Bean
     public NewTopic registration() {
-        return new NewTopic("registration", 1, (short) 1);
+        return new NewTopic("query_params", 1, (short) 1);
     }
+
 }
