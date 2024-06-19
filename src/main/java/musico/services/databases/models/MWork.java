@@ -3,16 +3,23 @@ package musico.services.databases.models;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import musico.services.databases.config.OntEntity;
+import musico.services.databases.config.OntEntityField;
 import musico.services.databases.config.OntologyModel;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.util.Values;
+import org.eclipse.rdf4j.sparqlbuilder.core.SparqlBuilder;
+import org.eclipse.rdf4j.sparqlbuilder.core.Variable;
 
 @Getter
 @Setter
 @Entity
+@Builder
 @Table(name = "musical_work")
-public class MusicalWork implements OntEntity {
+@NoArgsConstructor
+@AllArgsConstructor
+public class MWork implements OntEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "musical_work_id", nullable = false)
@@ -29,6 +36,7 @@ public class MusicalWork implements OntEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "genre_id")
+    @OntEntityField(type = OntEntityField.DataType.OBJECT, pred = "mo:genre")
     private Genre genre;
 
     @Size(max = 20)
@@ -40,6 +48,7 @@ public class MusicalWork implements OntEntity {
     private String key;
 
     @Column(name = "bpm")
+    @OntEntityField(type = OntEntityField.DataType.DATA, pred = "mo:bpm")
     private Integer bpm;
 
     @Size(max = 10)
@@ -59,12 +68,16 @@ public class MusicalWork implements OntEntity {
     private String artist;
 
     @Override
-    public String getIRI() {
+    public IRI getIRI() {
         String namespace = OntologyModel.getNamespaceString("");
-        return namespace + "MusicalWork/" + id;
+        return Values.iri(namespace + "MusicalWork/" + id);
     }
 
     @Override
+    public Variable getVar() {
+        return SparqlBuilder.var("musicalWork");
+    }
+
     public String getClassIRI() {
         String namespace = OntologyModel.getNamespaceString("mo");
         return namespace + "MusicalWork";

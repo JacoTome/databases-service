@@ -23,8 +23,15 @@ public class KafkaTopicConfig {
     }
 
     @Bean
-    public NewTopic registration() {
-        return new NewTopic("query_params", 1, (short) 1);
+    public NewTopic query_params() {
+        return new NewTopic("analysis-query_params", 1, (short) 1);
     }
-
+    @Bean
+    public NewTopic query_params_response() {
+        return new NewTopic("analysis-query_params_response", 1, (short) 1);
+    }
+    @Bean
+    public NewTopic profile_creation() {
+        return new NewTopic("profile-creation", 1, (short) 1);
+    }
 }

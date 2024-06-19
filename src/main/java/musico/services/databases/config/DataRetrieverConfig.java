@@ -11,10 +11,13 @@ import org.springframework.context.annotation.Configuration;
 public class DataRetrieverConfig {
     @Value("${graphdb.repository.url}")
     private String repositoryUrl;
+    @Value("${graphdb.repository.update.url}")
+    private String repositoryUpdateUrl;
 
     @Bean
     public RepositoryConnection connection() {
-        Repository repository = new SPARQLRepository(repositoryUrl);
+        Repository repository = new SPARQLRepository(repositoryUrl, repositoryUpdateUrl);
+
         repository.init();
         return repository.getConnection();
     }

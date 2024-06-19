@@ -1,13 +1,16 @@
 package musico.services.databases.utils;
 
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import musico.services.databases.config.OntEntity;
 import musico.services.databases.config.OntEntityField;
 import musico.services.databases.config.OntologyModel;
 import musico.services.databases.models.Users;
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.util.Values;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
+import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -16,6 +19,8 @@ import java.util.List;
 import java.util.Objects;
 
 @Slf4j
+@Component
+@AllArgsConstructor
 public class DataGenerator {
 
     /**
@@ -30,7 +35,7 @@ public class DataGenerator {
      */
     public List<String> genUserData(Users user) throws IllegalAccessException {
         Field[] fields = user.getClass().getDeclaredFields();
-        String subject = user.getUserIRI();
+        IRI subject = user.getIRI();
         ArrayList<String> data = new ArrayList<>();
         data.add(genUserTTL(user));
         for (Field field : fields) {
@@ -58,20 +63,19 @@ public class DataGenerator {
     }
 
 
-
     private String genUserTTL(Users user) {
         String ns = Objects.requireNonNull(OntologyModel.getNamespace("musicoo")).getName();
         Statement statement = Values.getValueFactory().createStatement(
-                Values.iri(user.getUserIRI()),
+                user.getIRI(),
                 RDF.TYPE,
                 Values.iri(ns + "HumanMusician")
         );
-        return genObjTTL(statement.getSubject().stringValue(),
+        return genObjTTL((IRI) statement.getSubject(),
                 statement.getPredicate().stringValue(),
-                statement.getObject().stringValue());
+                (IRI) statement.getObject());
     }
 
-    private List<String> genObjField(String subject, String pred, Object object) {
+    private List<String> genObjField(IRI subject, String pred, Object object) {
         ArrayList<String> data = new ArrayList<>();
         try {
             if (object instanceof Collection) {
@@ -91,11 +95,11 @@ public class DataGenerator {
         return data;
     }
 
-    private String genObjTTL(String subject, String pred, String object) {
-        return "<" + subject + "> <" + pred + "> <" + object + "> .\n";
+    private String genObjTTL(IRI subject, String pred, IRI object) {
+        return "<" + subject + "> <" + pred + "> <" + object + "> .";
     }
 
-    private String genDataTTL(String subject, String pred, String object) {
-        return "<" + subject + "> <" + pred + "> \"" + object + "\" .\n";
+    private String genDataTTL(IRI subject, String pred, String object) {
+        return "<"+ subject + "> <" + pred + "> \"" + object + "\" .";
     }
 }

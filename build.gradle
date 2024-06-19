@@ -28,9 +28,7 @@ repositories {
 
 dependencies {
 	implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
-
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
-//	compileOnly(project(':user-service'))
 	implementation 'org.eclipse.rdf4j:rdf4j:5.0.0-M2'
 	implementation 'org.eclipse.rdf4j:rdf4j-sparqlbuilder:5.0.0-M2'
 	implementation 'org.eclipse.rdf4j:rdf4j-repository-sparql:5.0.0-M2'

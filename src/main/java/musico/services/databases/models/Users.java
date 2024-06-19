@@ -1,13 +1,16 @@
 package musico.services.databases.models;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
+import musico.services.databases.config.OntEntity;
 import musico.services.databases.config.OntEntityField;
 import musico.services.databases.config.OntologyModel;
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Namespace;
+import org.eclipse.rdf4j.model.util.Values;
+import org.eclipse.rdf4j.sparqlbuilder.core.SparqlBuilder;
+import org.eclipse.rdf4j.sparqlbuilder.core.Variable;
+
 import java.lang.reflect.Field;
 import java.time.Instant;
 import java.util.HashMap;
@@ -18,13 +21,16 @@ import java.util.Set;
 @Setter
 @Entity
 @Builder
+@ToString
 @AllArgsConstructor
 @Table(name = "users")
-public class Users {
+public class Users implements OntEntity {
 
     @Id
     @Column(name = "userId", nullable = false)
     private Integer userId;
+
+    private String userIdGdb;
 
     @MapsId
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, optional = false)
@@ -32,7 +38,7 @@ public class Users {
     private Artist artist;
 
     @Column(name = "first_name", length = 50)
-    @OntEntityField(type = OntEntityField.DataType.DATA, pred = "foaf:firstName")
+//    @OntEntityField(type = OntEntityField.DataType.DATA, pred = "foaf:firstName")
     private String firstName;
 
     @Column(name = "last_name", length = 50)
@@ -92,7 +98,6 @@ public class Users {
     private Set<UserSetting> userSettings;
 
     @Column(name = "username", nullable = false, length = 50)
-    @OntEntityField(type = OntEntityField.DataType.DATA, pred = ":username")
     private String username;
 
     @Column(name = "email", nullable = false, length = 100)
@@ -108,38 +113,10 @@ public class Users {
     }
 
     @Override
-    public String toString() {
-        return "Users{" +
-                "firstName='" + firstName + '\'' +
-                ", surname='" + surname + '\'' +
-                ", codiceFiscale='" + codiceFiscale + '\'' +
-                ", based_near=" + based_near +
-                ", professionalLevel='" + professionalLevel + '\'' +
-                ", expertiseLevel='" + expertiseLevel + '\'' +
-                ", multiInstrumentalismLevel='" + multiInstrumentalismLevel + '\'' +
-                ", createdAt=" + createdAt +
-                ", updatedAt=" + updatedAt +
-                ", chatMessages=" + chatMessages +
-                ", friendships=" + friendships +
-                ", musicianGroups=" + musicianGroups +
-                ", instruments=" + instruments +
-                ", genres=" + genres +
-                ", userSettings=" + userSettings +
-                ", username='" + username + '\'' +
-                ", email='" + email + '\'' +
-                ", password='" + password + '\'' +
-                ", userId=" + userId +
-                ", artist=" + artist +
-                ", userRoles=" + userRoles +
-                '}';
-    }
-
-    public String getUserIRI() {
+    public IRI getIRI() {
         Namespace musinco = OntologyModel.getNamespace("");
         assert musinco != null;
-        return musinco.getName() +
-                "Users/" +
-                userId;
+        return Values.iri(musinco.getName() + "Users/" + userIdGdb);
     }
 
     public static Map<String, String> getFieldsPredicate() {
@@ -153,4 +130,14 @@ public class Users {
         return fields;
     }
 
+    @Override
+    public Variable getVar() {
+        return SparqlBuilder.var("user");
+    }
+
+    public static String getClassIRI() {
+        Namespace musinco = OntologyModel.getNamespace("musicoo");
+        assert musinco != null;
+        return musinco.getName() + "HumanMusician";
+    }
 }

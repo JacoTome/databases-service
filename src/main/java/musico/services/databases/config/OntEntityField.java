@@ -15,5 +15,4 @@ public @interface OntEntityField {
     DataType type() default DataType.DATA;
 
     String pred() default "";
-
 }

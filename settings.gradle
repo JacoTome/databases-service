@@ -1,3 +1,1 @@
 rootProject.name = 'databases-service'
-include('user-service')
-project(':user-service').projectDir = new File('../user-service')
