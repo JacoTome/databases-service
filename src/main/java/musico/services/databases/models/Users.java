@@ -1,6 +1,7 @@
 package musico.services.databases.models;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 import musico.services.databases.config.OntEntity;
 import musico.services.databases.config.OntEntityField;
@@ -13,6 +14,7 @@ import org.eclipse.rdf4j.sparqlbuilder.core.Variable;
 
 import java.lang.reflect.Field;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -23,14 +25,13 @@ import java.util.Set;
 @Builder
 @ToString
 @AllArgsConstructor
+@NoArgsConstructor
 @Table(name = "users")
 public class Users implements OntEntity {
 
     @Id
     @Column(name = "userId", nullable = false)
-    private Integer userId;
-
-    private String userIdGdb;
+    private String userId;
 
     @MapsId
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, optional = false)
@@ -80,17 +81,19 @@ public class Users implements OntEntity {
             inverseJoinColumns = @JoinColumn(name = "group_id"))
     private Set<MusicianGroup> musicianGroups;
 
-    @ManyToMany
-    @JoinTable(name = "user_has_instrument",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "instrument_id"))
+    //    @ManyToMany
+//    @JoinTable(name = "user_has_instrument",
+//            joinColumns = @JoinColumn(name = "user_id"),
+//            inverseJoinColumns = @JoinColumn(name = "instrument_id"))
+    @Transient
     @OntEntityField(type = OntEntityField.DataType.OBJECT, pred = "musicoo:plays_instrument")
     private Set<Instrument> instruments;
 
-    @ManyToMany
-    @JoinTable(name = "user_plays_genre",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "genre_id"))
+    //    @ManyToMany
+//    @JoinTable(name = "user_plays_genre",
+//            joinColumns = @JoinColumn(name = "user_id"),
+//            inverseJoinColumns = @JoinColumn(name = "genre_id"))
+    @Transient
     @OntEntityField(type = OntEntityField.DataType.OBJECT, pred = "musicoo:plays_genre")
     private Set<Genre> genres;
 
@@ -109,14 +112,46 @@ public class Users implements OntEntity {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "users", fetch = FetchType.EAGER)
     private Set<UserRole> userRoles;
 
-    public Users() {
-    }
+    @Column(name = "birthdate")
+    private LocalDate birthdate;
+
+    @Lob
+    @Column(name = "description")
+    private String description;
+
+    @Size(max = 100)
+    @Column(name = "profile_picture_path", length = 100)
+    private String profilePicturePath;
+
+    @Size(max = 100)
+    @Column(name = "soundcloud", length = 100)
+    private String soundcloud;
+
+    @Size(max = 100)
+    @Column(name = "youtube", length = 100)
+    private String youtube;
+
+    @Size(max = 100)
+    @Column(name = "spotify", length = 100)
+    private String spotify;
+
+    @Size(max = 100)
+    @Column(name = "apple_music", length = 100)
+    private String appleMusic;
+
+    @Size(max = 100)
+    @Column(name = "tidal", length = 100)
+    private String tidal;
+
+    @Size(max = 100)
+    @Column(name = "amazon_music", length = 100)
+    private String amazonMusic;
 
     @Override
     public IRI getIRI() {
         Namespace musinco = OntologyModel.getNamespace("");
         assert musinco != null;
-        return Values.iri(musinco.getName() + "Users/" + userIdGdb);
+        return Values.iri(musinco.getName() + "Users/" + userId);
     }
 
     public static Map<String, String> getFieldsPredicate() {

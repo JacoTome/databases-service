@@ -94,35 +94,41 @@ public interface OntEntity {
         for (Field field : clazz.getClass().getDeclaredFields()) {
             field.setAccessible(true);
             OntEntityField annotation = field.getAnnotation(OntEntityField.class);
-
             try {
+                // TODO: Make it better
                 if (annotation != null && field.get(clazz) != null) {
                     if (!((Set<?>) field.get(clazz)).isEmpty()) {
+                        IRI[] objs = getOntEntityIRIsArray(field.get(clazz));
                         switch (Objects.requireNonNull(annotation).type()) {
                             case OBJECT:
-                                IRI[] objs = getOntEntityIRIsArray(field.get(clazz));
+                                List<TriplePattern> optional = new ArrayList<>();
                                 if (entity instanceof Variable) {
-                                    patterns.add(
-                                            GraphPatterns.optional(
-                                                    GraphPatterns.tp(
-                                                            (Variable) entity,
-                                                            Values.iri(Objects.requireNonNull(OntologyModel.getPredicate(annotation.pred()))),
-                                                            objs
-                                                    )
+                                    optional.add(
+                                            GraphPatterns.tp(
+                                                    (Variable) entity,
+                                                    Values.iri(Objects.requireNonNull(OntologyModel.getPredicate(annotation.pred()))),
+                                                    objs
                                             )
                                     );
-
                                 } else {
-                                    patterns.add(
-                                            GraphPatterns.optional(
-                                                    GraphPatterns.tp(
-                                                            (Resource) entity,
-                                                            Values.iri(Objects.requireNonNull(OntologyModel.getPredicate(annotation.pred()))),
-                                                            objs
-                                                    )
+                                    optional.add(
+                                            GraphPatterns.tp(
+                                                    (Resource) entity,
+                                                    Values.iri(Objects.requireNonNull(OntologyModel.getPredicate(annotation.pred()))),
+                                                    objs
                                             )
                                     );
                                 }
+                                for (IRI obj : objs) {
+                                    optional.add(
+                                            GraphPatterns.tp(
+                                                    obj,
+                                                    Values.iri(Objects.requireNonNull(OntologyModel.getPredicate("schema:name"))),
+                                                    SparqlBuilder.var(obj.stringValue() + "_name")
+                                            )
+                                    );
+                                }
+                                patterns.add(GraphPatterns.optional(optional.toArray(new TriplePattern[0])));
                                 break;
                             case DATA:
                                 Object objValue = field.get(clazz);
@@ -148,50 +154,64 @@ public interface OntEntity {
                                 break;
                         }
                     } else {
+                        List<TriplePattern> optional = new ArrayList<>();
                         if (entity instanceof Variable) {
-                            patterns.add(
-                                    GraphPatterns.optional(
-                                            GraphPatterns.tp(
-                                                    (Variable) entity,
-                                                    Values.iri(Objects.requireNonNull(OntologyModel.getPredicate(annotation.pred()))),
-                                                    SparqlBuilder.var(field.getName())
-                                            )
+                            optional.add(
+                                    GraphPatterns.tp(
+                                            (Variable) entity,
+                                            Values.iri(Objects.requireNonNull(OntologyModel.getPredicate(annotation.pred()))),
+                                            SparqlBuilder.var(field.getName())
                                     )
                             );
                         } else {
-                            patterns.add(
-                                    GraphPatterns.optional(
-                                            GraphPatterns.tp(
-                                                    (Resource) entity,
-                                                    Values.iri(Objects.requireNonNull(OntologyModel.getPredicate(annotation.pred()))),
-                                                    SparqlBuilder.var(field.getName())
-                                            )
+                            optional.add(
+                                    GraphPatterns.tp(
+                                            (Resource) entity,
+                                            Values.iri(Objects.requireNonNull(OntologyModel.getPredicate(annotation.pred()))),
+                                            SparqlBuilder.var(field.getName())
                                     )
                             );
                         }
+                        if (annotation.type() == OntEntityField.DataType.OBJECT) {
+                            optional.add(
+                                    GraphPatterns.tp(
+                                            SparqlBuilder.var(field.getName()),
+                                            Values.iri(Objects.requireNonNull(OntologyModel.getPredicate("schema:name"))),
+                                            SparqlBuilder.var(field.getName() + "_name")
+                                    )
+                            );
+                        }
+                        patterns.add(GraphPatterns.optional(optional.toArray(new TriplePattern[0])));
                     }
                 } else if (annotation != null) {
+                    List<TriplePattern> optional = new ArrayList<>();
                     if (entity instanceof Variable) {
-                        patterns.add(
-                                GraphPatterns.optional(
-                                        GraphPatterns.tp(
-                                                (Variable) entity,
-                                                Values.iri(Objects.requireNonNull(OntologyModel.getPredicate(annotation.pred()))),
-                                                SparqlBuilder.var(field.getName())
-                                        )
+                        optional.add(
+                                GraphPatterns.tp(
+                                        (Variable) entity,
+                                        Values.iri(Objects.requireNonNull(OntologyModel.getPredicate(annotation.pred()))),
+                                        SparqlBuilder.var(field.getName())
                                 )
                         );
                     } else {
-                        patterns.add(
-                                GraphPatterns.optional(
-                                        GraphPatterns.tp(
-                                                (Resource) entity,
-                                                Values.iri(Objects.requireNonNull(OntologyModel.getPredicate(annotation.pred()))),
-                                                SparqlBuilder.var(field.getName())
-                                        )
+                        optional.add(
+                                GraphPatterns.tp(
+                                        (Resource) entity,
+                                        Values.iri(Objects.requireNonNull(OntologyModel.getPredicate(annotation.pred()))),
+                                        SparqlBuilder.var(field.getName())
                                 )
                         );
                     }
+                    if (annotation.type() == OntEntityField.DataType.OBJECT) {
+                        optional.add(
+                                GraphPatterns.tp(
+                                        SparqlBuilder.var(field.getName()),
+                                        Values.iri(Objects.requireNonNull(OntologyModel.getPredicate("schema:name"))),
+                                        SparqlBuilder.var(field.getName() + "_name")
+                                )
+                        );
+                    }
+                    patterns.add(GraphPatterns.optional(optional.toArray(new TriplePattern[0])));
                 }
             } catch (IllegalAccessException e) {
                 System.out.println("Error while accessing field: " + e.getMessage());

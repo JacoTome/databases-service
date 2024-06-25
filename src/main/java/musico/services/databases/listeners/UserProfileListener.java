@@ -3,7 +3,6 @@ package musico.services.databases.listeners;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import musico.services.databases.enums.REGISTRATION_ENUMS;
-import musico.services.databases.models.kafka.UserProfileParams;
 import musico.services.databases.models.kafka.UsersQueryParams;
 import musico.services.databases.services.UserProfileService;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -11,12 +10,11 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.stereotype.Component;
 
-import java.util.Objects;
-
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
+// TODO: Handle Errors and Exceptions in Methods
 public class UserProfileListener {
 
     private final UserProfileService userProfileService;

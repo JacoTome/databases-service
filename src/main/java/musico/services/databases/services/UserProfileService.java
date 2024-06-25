@@ -2,16 +2,14 @@ package musico.services.databases.services;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-//import musico.services.user.dto.AuthProcessDTO;
 import musico.services.databases.enums.REGISTRATION_ENUMS;
+import musico.services.databases.models.Users;
 import musico.services.databases.models.kafka.UsersQueryParams;
 import musico.services.databases.services.kafka.UsersQueryParamsService;
-import musico.services.databases.utils.DataGenerator;
 import musico.services.databases.utils.DataRetriever;
 import org.eclipse.rdf4j.query.BindingSet;
 import org.eclipse.rdf4j.sparqlbuilder.graphpattern.GraphPatternNotTriples;
 import org.eclipse.rdf4j.sparqlbuilder.graphpattern.TriplePattern;
-import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -20,14 +18,11 @@ import java.util.List;
 @Service
 @AllArgsConstructor
 public class UserProfileService {
-    private final ArtistService artistService;
     private final DataRetriever dataRetriever;
-    private final DataGenerator dataGenerator;
     private final UsersQueryParamsService usersQueryParamsService;
+    private final UserService userService;
 
     public REGISTRATION_ENUMS checkProfileAlreadyExists(UsersQueryParams userID) {
-        // Check if user already exists in graphDB
-        // If user exists, return REGISTRATION_ENUMS.USER_ALREADY_EXISTS
         GraphPatternNotTriples query = usersQueryParamsService.checkUserExists(userID);
         List<BindingSet> results = dataRetriever.createAndExecuteSelectQuery(query);
         if (!results.isEmpty()) {
@@ -36,12 +31,14 @@ public class UserProfileService {
         return REGISTRATION_ENUMS.CHECK_VALID;
     }
 
-    public void createUserProfile(UsersQueryParams signupData) throws IllegalAccessException {
+    public void createUserProfile(UsersQueryParams signupData) {
         List<TriplePattern> query = usersQueryParamsService.buildInsertQueryGraphPattern(signupData);
+        userService.createUserProfile(signupData);
         dataRetriever.createAndExecuteInsertQuery(query);
     }
 
     public UsersQueryParams getUserProfile(UsersQueryParams userSignup) {
+        Users user = userService.getUserProfile(userSignup.userId());
         GraphPatternNotTriples userQuery = usersQueryParamsService.buildQueryGraphPattern(userSignup);
         log.info("User Query: {}", userQuery.getQueryString());
         List<BindingSet> results = dataRetriever.createAndExecuteSelectQuery(userQuery);
@@ -49,6 +46,20 @@ public class UserProfileService {
             log.error("No results found for user: {}", userSignup);
             return null;
         }
-        return usersQueryParamsService.getResponseMessageFromQueryResults(results).build();
+        UsersQueryParams.UsersQueryParamsBuilder builder = usersQueryParamsService.getResponseMessageFromQueryResults(results);
+        builder.userId(userSignup.userId())
+                .firstName(user.getFirstName())
+                .surname(user.getSurname())
+                .amazonMusic(user.getAmazonMusic())
+                .appleMusic(user.getAppleMusic())
+                .birthdate(user.getBirthdate())
+                .description(user.getDescription())
+                .profilePicturePath(user.getProfilePicturePath())
+                .soundcloud(user.getSoundcloud())
+                .spotify(user.getSpotify())
+                .tidal(user.getTidal())
+                .youtube(user.getYoutube());
+        return builder.build();
+
     }
 }

@@ -40,7 +40,7 @@ public class UsersQueryParamsService {
         if(queryParams.instruments() != null)
             instruments = Arrays.stream(queryParams.instruments()).map(instrumentRepository::findByInstrumentNameLike).filter(Objects::nonNull).collect(Collectors.toSet());
         return Users.builder()
-                .userIdGdb(queryParams.userId())
+                .userId(queryParams.userId())
                 .genres(genres)
                 .firstName(queryParams.firstName())
                 .surname(queryParams.surname())
@@ -69,10 +69,12 @@ public class UsersQueryParamsService {
         if (params.userId() == null) {
             Variable user = SparqlBuilder.var("user");
             return GraphPatterns.and(GraphPatterns.tp(user, RDF.TYPE, Values.iri(Users.getClassIRI())));
-        } else {
-            Users dataToQuery = getOntEntity(params);
-            return GraphPatterns.and(GraphPatterns.tp(dataToQuery.getIRI(), RDF.TYPE, Values.iri(Users.getClassIRI())));
         }
+        return GraphPatterns.and();
+//        else {
+//            Users dataToQuery = getOntEntity(params);
+//            return GraphPatterns.and(GraphPatterns.tp(dataToQuery.getIRI(), RDF.TYPE, Values.iri(Users.getClassIRI())));
+//        }
     }
 
     private GraphPatternNotTriples getQueryBody(UsersQueryParams params) {
@@ -87,6 +89,7 @@ public class UsersQueryParamsService {
             return response;
         }
         for (BindingSet row : params) {
+            log.info("Row: {}", row.toString());
             for (Field field : response.getClass().getDeclaredFields()) {
                 field.setAccessible(true);
                 try {
@@ -95,11 +98,11 @@ public class UsersQueryParamsService {
                         if (field.getType().isArray()) {
                             String[] values = field.get(response) != null ? (String[]) field.get(response) : new String[0];
                             Set<String> list = new HashSet<>(Arrays.asList(values));
-                            list.add(row.getValue(field.getName()).stringValue());
+                            list.add(row.getValue(field.getName() + "_name").stringValue());
                             field.set(response, list.toArray(new String[0]));
                             continue;
                         }
-                        field.set(response, row.getValue(field.getName()).stringValue());
+                        field.set(response, row.getValue(field.getName()+"_name").stringValue());
                     }
                 } catch (IllegalAccessException e) {
                     log.error("Error: {}", e.getMessage());
