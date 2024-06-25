@@ -22,7 +22,7 @@ public class UserProfileListener {
 
     @KafkaListener(topics = "profile-creation", groupId = "databases-service",
             containerFactory = "usersQueryParamsListener")
-    public void listenRegistration(UsersQueryParams signupData) throws IllegalAccessException {
+    public void listenRegistration(UsersQueryParams signupData) {
         if (signupData == null) {
             log.error("Received null registration request");
             return;
@@ -30,10 +30,10 @@ public class UserProfileListener {
         log.info("Received registration request: {}", signupData);
         // Check if profile already exists
         REGISTRATION_ENUMS check = userProfileService.checkProfileAlreadyExists(signupData);
-        if (check != REGISTRATION_ENUMS.CHECK_VALID) {
-            log.error("User already exists: {}", check);
-            return;
-        }
+//        if (check != REGISTRATION_ENUMS.CHECK_VALID) {
+//            log.error("User already exists: {}", check);
+//            return;
+//        }
         // Create user profile on GraphDB
         userProfileService.createUserProfile(signupData);
     }

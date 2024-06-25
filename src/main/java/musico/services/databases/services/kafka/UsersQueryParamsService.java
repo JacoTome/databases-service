@@ -43,7 +43,7 @@ public class UsersQueryParamsService {
                 .userId(queryParams.userId())
                 .genres(genres)
                 .firstName(queryParams.firstName())
-                .surname(queryParams.surname())
+                .lastName(queryParams.surname())
                 .instruments(instruments)
                 .build();
     }

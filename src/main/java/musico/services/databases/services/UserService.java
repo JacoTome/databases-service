@@ -21,8 +21,9 @@ public class UserService {
     public void createUserProfile(UsersQueryParams user) {
         Users userToSave = Users.builder()
                 .userId(user.userId())
+                .username(user.username())
                 .firstName(user.firstName())
-                .surname(user.surname())
+                .lastName(user.surname())
                 .birthdate(user.birthdate())
                 .description(user.description())
                 .profilePicturePath(user.profilePicturePath())

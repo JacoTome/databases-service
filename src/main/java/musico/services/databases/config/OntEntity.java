@@ -34,6 +34,9 @@ public interface OntEntity {
                     switch (annotation.type()) {
                         case OBJECT:
                             IRI[] objs = getOntEntityIRIsArray(field.get(clazz));
+                            if(objs.length == 0) {
+                                continue;
+                            }
                             if (entity instanceof Variable) {
                                 res.add(
                                         GraphPatterns.tp(

@@ -48,8 +48,9 @@ public class UserProfileService {
         }
         UsersQueryParams.UsersQueryParamsBuilder builder = usersQueryParamsService.getResponseMessageFromQueryResults(results);
         builder.userId(userSignup.userId())
+                .requestID(userSignup.requestID())
                 .firstName(user.getFirstName())
-                .surname(user.getSurname())
+                .surname(user.getLastName())
                 .amazonMusic(user.getAmazonMusic())
                 .appleMusic(user.getAppleMusic())
                 .birthdate(user.getBirthdate())

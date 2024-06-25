@@ -8,6 +8,7 @@ import java.time.LocalDate;
 public record UsersQueryParams (String requestID,
                                 String userId,
                                 String firstName,
+                                String username,
                                 String surname,
                                 LocalDate birthdate,
                                 String[] genres,

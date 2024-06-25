@@ -53,7 +53,4 @@ public class Instrument implements OntEntity {
     public Variable getVar() {
         return SparqlBuilder.var("instrument");
     }
-
-
-    //TODO [JPA Buddy] generate columns from DB
 }
