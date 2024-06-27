@@ -41,10 +41,17 @@ public class AnalysisListener {
      */
     @KafkaListener(topics = "analysis-query_params", groupId = "databases-service",
             containerFactory = "musicalWorkQueryParamsListener")
-    public void listen(@Payload MusicalWorkQueryParams message) {
+    public void listen(MusicalWorkQueryParams message) {
         log.debug("Received message from {}", message.requestId());
         try {
             GraphPatternNotTriples query = musicalWorkQueryParamsService.buildQueryGraphPattern(message);
+            {//Test
+                UsersQueryParams user = UsersQueryParams.builder()
+                        .requestID(message.requestId())
+                        .userId("ex")
+                        .build();
+                kafkaTemplate.send("analysis-query_params_response", user);
+            }
             for (BindingSet row : dataRetriever.createAndExecuteSelectQuery(query)) {
                 log.debug("Row: {}", row);
                 if (row.getValue("user").toString().contains("ex")) {
@@ -58,6 +65,7 @@ public class AnalysisListener {
 
                 log.debug("Response: {}", response);
                 kafkaTemplate.send("analysis-query_params_response", response);
+
             }
         } catch (Exception e) {
             log.error("Error: {}", e.getMessage());

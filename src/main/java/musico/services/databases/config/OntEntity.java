@@ -100,7 +100,7 @@ public interface OntEntity {
             try {
                 // TODO: Make it better
                 if (annotation != null && field.get(clazz) != null) {
-                    if (!((Set<?>) field.get(clazz)).isEmpty()) {
+                    if (field.get(clazz) instanceof Set<?> && !((Set<?>) field.get(clazz)).isEmpty()) {
                         IRI[] objs = getOntEntityIRIsArray(field.get(clazz));
                         switch (Objects.requireNonNull(annotation).type()) {
                             case OBJECT:

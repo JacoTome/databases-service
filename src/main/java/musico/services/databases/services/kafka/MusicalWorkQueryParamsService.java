@@ -30,7 +30,8 @@ public class MusicalWorkQueryParamsService {
     }
 
     private OntEntity getOntEntity(MusicalWorkQueryParams queryParams) {
-        Genre genre = genreRepository.findByGenreNameLike(queryParams.genre());
+        // TODO: Change in order to use more Genres, only one is used for now
+        Genre genre = genreRepository.findByGenreNameLike(queryParams.genre()[0]);
         return MWork.builder()
                 .genre(genre)
                 .bpm(queryParams.bpm())
