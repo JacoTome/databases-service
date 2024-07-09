@@ -12,6 +12,7 @@ import org.eclipse.rdf4j.sparqlbuilder.graphpattern.GraphPatternNotTriples;
 import org.eclipse.rdf4j.sparqlbuilder.graphpattern.TriplePattern;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -39,6 +40,7 @@ public class UserProfileService {
 
     public UsersQueryParams getUserProfile(UsersQueryParams userSignup) {
         Users user = userService.getUserProfile(userSignup.userId());
+        log.info("User: {}", user);
         GraphPatternNotTriples userQuery = usersQueryParamsService.buildQueryGraphPattern(userSignup);
         log.info("User Query: {}", userQuery.getQueryString());
         List<BindingSet> results = dataRetriever.createAndExecuteSelectQuery(userQuery);
@@ -49,6 +51,7 @@ public class UserProfileService {
         UsersQueryParams.UsersQueryParamsBuilder builder = usersQueryParamsService.getResponseMessageFromQueryResults(results);
         builder.userId(userSignup.userId())
                 .requestID(userSignup.requestID())
+                .username(user.getUsername())
                 .firstName(user.getFirstName())
                 .surname(user.getLastName())
                 .amazonMusic(user.getAmazonMusic())
@@ -62,5 +65,37 @@ public class UserProfileService {
                 .youtube(user.getYoutube());
         return builder.build();
 
+    }
+
+    public List<UsersQueryParams> getUsersProfileByUsername(UsersQueryParams params) {
+        List<UsersQueryParams> response = new ArrayList<>();
+        List<Users> users = userService.getUsersProfileByUsername(params.username());
+        for (Users user : users) {
+            log.info("User: {}", user.getUsername());
+            GraphPatternNotTriples userQuery = usersQueryParamsService.buildQueryGraphPattern(params);
+            log.info("User Query: {}", userQuery.getQueryString());
+            List<BindingSet> results = dataRetriever.createAndExecuteSelectQuery(userQuery);
+            if (results.isEmpty()) {
+                log.error("No results found for user: {}", params);
+            } else {
+                UsersQueryParams.UsersQueryParamsBuilder builder = usersQueryParamsService.getResponseMessageFromQueryResults(results);
+                builder.userId(user.getUserId())
+                        .requestID(params.requestID())
+                        .username(user.getUsername())
+                        .firstName(user.getFirstName())
+                        .surname(user.getLastName())
+                        .amazonMusic(user.getAmazonMusic())
+                        .appleMusic(user.getAppleMusic())
+                        .birthdate(user.getBirthdate())
+                        .description(user.getDescription())
+                        .profilePicturePath(user.getProfilePicturePath())
+                        .soundcloud(user.getSoundcloud())
+                        .spotify(user.getSpotify())
+                        .tidal(user.getTidal())
+                        .youtube(user.getYoutube());
+                response.add(builder.build());
+            }
+        }
+        return response;
     }
 }

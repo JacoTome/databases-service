@@ -3,12 +3,16 @@ package musico.services.databases.listeners;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import musico.services.databases.enums.REGISTRATION_ENUMS;
+import musico.services.databases.models.Users;
 import musico.services.databases.models.kafka.UsersQueryParams;
 import musico.services.databases.services.UserProfileService;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 @Slf4j
@@ -44,7 +48,19 @@ public class UserProfileListener {
     public UsersQueryParams getProfile(UsersQueryParams userSignup) {
         log.info("Received getProfile request: {}", userSignup.toString());
         UsersQueryParams response = userProfileService.getUserProfile(userSignup);
+        if(response == null) {
+            log.error("No results found for user: {}", userSignup);
+            return UsersQueryParams.builder().userId("NOT_FOUND").build();
+        }
         log.info("Response: {}", response);
         return response;
+    }
+
+    @KafkaListener(topics = "profile-get-username", groupId = "databases-service",
+            containerFactory = "usersQueryParamsListener")
+    @SendTo
+    public List<UsersQueryParams> getProfilesByUsername(UsersQueryParams userSignup) {
+        log.info("Received getProfileByUsername request: {}", userSignup.toString());
+        return userProfileService.getUsersProfileByUsername(userSignup);
     }
 }

@@ -7,6 +7,8 @@ import musico.services.databases.models.kafka.UsersQueryParams;
 import musico.services.databases.repositories.UserRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Slf4j
 @Service
 @AllArgsConstructor
@@ -16,6 +18,10 @@ public class UserService {
 
     public Users getUserProfile(String userId) {
         return userRepository.findByUserId(userId);
+    }
+
+    public List<Users> getUsersProfileByUsername(String username) {
+        return userRepository.findByUsername(username);
     }
 
     public void createUserProfile(UsersQueryParams user) {
